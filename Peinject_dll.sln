@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Peinject_dll", "Peinject_dl
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "shellcode调试", "shellcode调试\shellcode调试.vcxproj", "{142FB2D5-E2DD-4527-9CE1-83145CB397D9}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WriteINJinfo", "WriteINJinfo\WriteINJinfo.vcxproj", "{19DFA328-AB77-401C-8CA9-60150C3B26AF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{142FB2D5-E2DD-4527-9CE1-83145CB397D9}.Release|x64.Build.0 = Release|x64
 		{142FB2D5-E2DD-4527-9CE1-83145CB397D9}.Release|x86.ActiveCfg = Release|Win32
 		{142FB2D5-E2DD-4527-9CE1-83145CB397D9}.Release|x86.Build.0 = Release|Win32
+		{19DFA328-AB77-401C-8CA9-60150C3B26AF}.Debug|x64.ActiveCfg = Debug|x64
+		{19DFA328-AB77-401C-8CA9-60150C3B26AF}.Debug|x64.Build.0 = Debug|x64
+		{19DFA328-AB77-401C-8CA9-60150C3B26AF}.Debug|x86.ActiveCfg = Debug|Win32
+		{19DFA328-AB77-401C-8CA9-60150C3B26AF}.Debug|x86.Build.0 = Debug|Win32
+		{19DFA328-AB77-401C-8CA9-60150C3B26AF}.Release|x64.ActiveCfg = Release|x64
+		{19DFA328-AB77-401C-8CA9-60150C3B26AF}.Release|x64.Build.0 = Release|x64
+		{19DFA328-AB77-401C-8CA9-60150C3B26AF}.Release|x86.ActiveCfg = Release|Win32
+		{19DFA328-AB77-401C-8CA9-60150C3B26AF}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

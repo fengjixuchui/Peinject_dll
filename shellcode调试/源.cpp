@@ -10,7 +10,7 @@ void main()
 		return;
 	}
 	int filesize = GetFileSize(hFile, NULL);
-	char* lpMemory = new char[filesize];
+	LPVOID lpMemory = VirtualAlloc(NULL, filesize, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 	DWORD RSize=0;
 	ReadFile(hFile, lpMemory,filesize,&RSize, NULL);
 	__asm {
@@ -18,8 +18,6 @@ void main()
 		nop
 		nop
 		nop
-		lea eax, lpMemory
-		push eax
-		ret; 
+		jmp lpMemory
 	}
 }
