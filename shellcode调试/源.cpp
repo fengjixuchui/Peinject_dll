@@ -1,5 +1,5 @@
 #include<windows.h>
-#define  path  "Peinject_dll.bin"
+#define  path  "1.bin"
 
 
 void main()
@@ -13,7 +13,8 @@ void main()
 	LPVOID lpMemory = VirtualAlloc(NULL, filesize, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 	DWORD RSize=0;
 	ReadFile(hFile, lpMemory,filesize,&RSize, NULL);
-	__asm {
+	__asm 
+	{
 		nop
 		nop
 		nop
