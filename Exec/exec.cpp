@@ -2,11 +2,10 @@
 
 extern "C" __declspec(dllexport) void __cdecl Exec(LPVOID lppath)
 {
-	WinExec("C:\\Users\\Leech\\Desktop\\TTHexEdit.exe", 5);
 	ShellExecuteA(0, "open", (LPSTR)lppath, 0, 0, 5);
 	_asm
 	{
-		mov eax, Exec                       //这里填入跳转指令
+		mov eax, Exec                       //这里填入旧的入口点指令
 		jmp  eax   
 	}
 }

