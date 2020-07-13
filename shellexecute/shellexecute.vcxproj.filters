@@ -15,8 +15,8 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="exec.cpp">
+    <MASM Include="main.asm">
       <Filter>源文件</Filter>
-    </ClCompile>
+    </MASM>
   </ItemGroup>
 </Project>
